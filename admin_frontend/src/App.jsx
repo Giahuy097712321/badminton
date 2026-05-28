@@ -15,7 +15,7 @@ function App() {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [courtCount, setCourtCount] = useState(1);
-  const [levels, setLevels] = useState(['Trung bình -']);
+  const [levels, setLevels] = useState(['Newbie']);
   const [price, setPrice] = useState(50000);
   const [maxSlots, setMaxSlots] = useState(10);
 
@@ -59,7 +59,7 @@ function App() {
       if (res.ok) {
         alert('Tạo buổi giao lưu thành công!');
         setTitle('');
-        setLevels(['Trung bình -']);
+        setLevels(['Newbie']);
         // No need to fetchSessions, socket will handle it
       }
     } catch (err) {
@@ -134,7 +134,7 @@ function App() {
           <div className="form-group">
             <label style={{ display: 'block', marginBottom: '0.5rem' }}>Trình độ yêu cầu (chọn nhiều)</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem', padding: '0.5rem 0' }}>
-              {['Trung bình yếu', 'Trung bình -', 'Trung bình', 'Trung bình +'].map(lvl => (
+              {['Newbie', 'Yếu -', 'Yếu +', 'Trung bình yếu', 'Trung bình -', 'Trung bình', 'Trung bình +'].map(lvl => (
                 <label key={lvl} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', color: 'var(--text-main)' }}>
                   <input
                     type="checkbox"

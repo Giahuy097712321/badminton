@@ -32,7 +32,7 @@ function App() {
   const [selectedSessionId, setSelectedSessionId] = useState(null);
   const [guestName, setGuestName] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
-  const [guestLevels, setGuestLevels] = useState(['Trung bình -']); // Default level
+  const [guestLevels, setGuestLevels] = useState(['Newbie']); // Default level
   const [guestSlots, setGuestSlots] = useState(1);
 
   const fetchSessions = async () => {
@@ -116,7 +116,7 @@ function App() {
       setShowModal(false);
       setGuestName('');
       setGuestPhone('');
-      setGuestLevels(['Trung bình -']);
+      setGuestLevels(['Newbie']);
       setGuestSlots(1);
       // No need to fetchSessions here, the socket event will trigger it
     } catch (err) {
@@ -212,7 +212,7 @@ function App() {
               <div className="form-group">
                 <label style={{ display: 'block', marginBottom: '0.5rem' }}>Trình độ của bạn (chọn nhiều)</label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem', padding: '0.5rem 0' }}>
-                  {['Trung bình yếu', 'Trung bình -', 'Trung bình', 'Trung bình +'].map(lvl => (
+                  {['Newbie', 'Yếu -', 'Yếu +', 'Trung bình yếu', 'Trung bình -', 'Trung bình', 'Trung bình +'].map(lvl => (
                     <label key={lvl} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', color: 'var(--text-main)' }}>
                       <input
                         type="checkbox"
