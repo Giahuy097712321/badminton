@@ -32,7 +32,7 @@ function App() {
   const [selectedSessionId, setSelectedSessionId] = useState(null);
   const [guestName, setGuestName] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
-  const [guestLevel, setGuestLevel] = useState('Trung bình -'); // Default level
+  const [guestLevels, setGuestLevels] = useState(['Trung bình -']); // Default level
   const [guestSlots, setGuestSlots] = useState(1);
 
   const fetchSessions = async () => {
@@ -88,6 +88,11 @@ function App() {
       return;
     }
 
+    if (guestLevels.length === 0) {
+      alert('Vui lòng chọn ít nhất một trình độ!');
+      return;
+    }
+
     try {
       const res = await fetch(`${API_URL}/api/sessions/${selectedSessionId}/register`, {
         method: 'POST',
@@ -95,7 +100,8 @@ function App() {
         body: JSON.stringify({ 
           name: nameClean, 
           phone: phoneClean, 
-          level: guestLevel,
+          level: guestLevels.join(', '),
+          levels: guestLevels,
           slots: guestSlots
         })
       });
@@ -110,7 +116,7 @@ function App() {
       setShowModal(false);
       setGuestName('');
       setGuestPhone('');
-      setGuestLevel('Trung bình -');
+      setGuestLevels(['Trung bình -']);
       setGuestSlots(1);
       // No need to fetchSessions here, the socket event will trigger it
     } catch (err) {
@@ -204,13 +210,26 @@ function App() {
                 <input type="tel" className="input-field" value={guestPhone} onChange={e=>setGuestPhone(e.target.value)} required placeholder="09xxxx..." />
               </div>
               <div className="form-group">
-                <label>Trình độ của bạn</label>
-                <select className="input-field select-animated" value={guestLevel} onChange={e=>setGuestLevel(e.target.value)} required>
-                  <option value="Trung bình yếu">Trung bình yếu</option>
-                  <option value="Trung bình -">Trung bình -</option>
-                  <option value="Trung bình">Trung bình</option>
-                  <option value="Trung bình +">Trung bình +</option>
-                </select>
+                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Trình độ của bạn (chọn nhiều)</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem', padding: '0.5rem 0' }}>
+                  {['Trung bình yếu', 'Trung bình -', 'Trung bình', 'Trung bình +'].map(lvl => (
+                    <label key={lvl} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', color: 'var(--text-main)' }}>
+                      <input
+                        type="checkbox"
+                        checked={guestLevels.includes(lvl)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setGuestLevels([...guestLevels, lvl]);
+                          } else {
+                            setGuestLevels(guestLevels.filter(l => l !== lvl));
+                          }
+                        }}
+                        style={{ accentColor: 'var(--primary)', width: '1.1rem', height: '1.1rem' }}
+                      />
+                      {lvl}
+                    </label>
+                  ))}
+                </div>
               </div>
               <div className="form-group">
                 <label>Số lượng Slot đăng ký</label>

@@ -70,8 +70,19 @@ app.get('/api/sessions', async (req, res) => {
 // POST new session
 app.post('/api/sessions', async (req, res) => {
   try {
-    const { title, date, courtCount, level, price, maxSlots } = req.body;
-    const newSession = new Session({ title, date, courtCount, level, price, maxSlots });
+    const { title, date, courtCount, level, levels, price, maxSlots } = req.body;
+    const sessionLevels = Array.isArray(levels) ? levels : (level ? [level] : []);
+    const levelStr = sessionLevels.join(', ') || 'Chưa chọn';
+
+    const newSession = new Session({ 
+      title, 
+      date, 
+      courtCount, 
+      level: levelStr, 
+      levels: sessionLevels,
+      price, 
+      maxSlots 
+    });
     const savedSession = await newSession.save();
     
     broadcastUpdate(); // Emit socket event
@@ -99,7 +110,7 @@ app.delete('/api/sessions/:id', async (req, res) => {
 // POST register for a session
 app.post('/api/sessions/:id/register', async (req, res) => {
   try {
-    const { name, phone, level, slots } = req.body;
+    const { name, phone, level, levels, slots } = req.body;
     const session = await Session.findById(req.params.id);
     
     if (!session) {
@@ -142,10 +153,14 @@ app.post('/api/sessions/:id/register', async (req, res) => {
       return res.status(400).json({ error: 'Số điện thoại này đã được đăng ký cho buổi này!' });
     }
 
+    const guestLevels = Array.isArray(levels) ? levels : (level ? [level] : []);
+    const guestLevelStr = guestLevels.join(', ') || 'Không xác định';
+
     session.registeredMembers.push({ 
       name: nameClean, 
       phone: phoneClean, 
-      level: level || 'Không xác định',
+      level: guestLevelStr,
+      levels: guestLevels,
       slots: numSlots
     });
     await session.save();

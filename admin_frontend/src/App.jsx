@@ -15,7 +15,7 @@ function App() {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [courtCount, setCourtCount] = useState(1);
-  const [level, setLevel] = useState('Trung bình -');
+  const [levels, setLevels] = useState(['Trung bình -']);
   const [price, setPrice] = useState(50000);
   const [maxSlots, setMaxSlots] = useState(10);
 
@@ -46,15 +46,20 @@ function App() {
 
   const handleCreateSession = async (e) => {
     e.preventDefault();
+    if (levels.length === 0) {
+      alert('Vui lòng chọn ít nhất một trình độ yêu cầu!');
+      return;
+    }
     try {
       const res = await fetch(`${API_URL}/api/sessions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, date, courtCount, level, price, maxSlots })
+        body: JSON.stringify({ title, date, courtCount, level: levels.join(', '), levels, price, maxSlots })
       });
       if (res.ok) {
         alert('Tạo buổi giao lưu thành công!');
         setTitle('');
+        setLevels(['Trung bình -']);
         // No need to fetchSessions, socket will handle it
       }
     } catch (err) {
@@ -127,13 +132,26 @@ function App() {
             </div>
           </div>
           <div className="form-group">
-            <label>Trình độ yêu cầu</label>
-            <select className="input-field select-animated" value={level} onChange={e => setLevel(e.target.value)}>
-              <option value="Trung bình yếu">Trung bình yếu</option>
-              <option value="Trung bình -">Trung bình -</option>
-              <option value="Trung bình">Trung bình</option>
-              <option value="Trung bình +">Trung bình +</option>
-            </select>
+            <label style={{ display: 'block', marginBottom: '0.5rem' }}>Trình độ yêu cầu (chọn nhiều)</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem', padding: '0.5rem 0' }}>
+              {['Trung bình yếu', 'Trung bình -', 'Trung bình', 'Trung bình +'].map(lvl => (
+                <label key={lvl} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.95rem', color: 'var(--text-main)' }}>
+                  <input
+                    type="checkbox"
+                    checked={levels.includes(lvl)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setLevels([...levels, lvl]);
+                      } else {
+                        setLevels(levels.filter(l => l !== lvl));
+                      }
+                    }}
+                    style={{ accentColor: 'var(--primary)', width: '1.1rem', height: '1.1rem' }}
+                  />
+                  {lvl}
+                </label>
+              ))}
+            </div>
           </div>
           <div className="form-group">
             <label>Lệ phí / Người (VNĐ)</label>
