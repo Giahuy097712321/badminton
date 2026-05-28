@@ -146,11 +146,12 @@ function App() {
         <div className="admin-list-container">
           {sessions.map(s => {
               const isPast = isPastSession(s.date);
+              const registeredCount = s.registeredMembers?.reduce((sum, m) => sum + (m.slots || 1), 0) || 0;
               return (
               <div key={s._id} className="admin-session-card" style={{border: isPast ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(16, 185, 129, 0.4)'}}>
                 <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                   <h4 style={{color: isPast ? 'var(--text-muted)' : 'var(--primary)', fontSize: '1.2rem', textShadow: isPast ? 'none' : '0 0 8px rgba(16, 185, 129, 0.3)'}}>
-                    {s.title} ({s.registeredMembers?.length || 0}/{s.maxSlots}) {isPast && '[Đã kết thúc]'}
+                    {s.title} ({registeredCount}/{s.maxSlots}) {isPast && '[Đã kết thúc]'}
                   </h4>
                   <button onClick={() => handleDeleteSession(s._id)} className="btn-delete-session">Xoá buổi này</button>
                 </div>
@@ -162,7 +163,9 @@ function App() {
                       <div key={idx} className="member-item">
                         <div className="member-info">
                           <span className="member-number">{idx + 1}.</span>
-                          <span className="member-name">{m.name}</span>
+                          <span className="member-name">
+                            {m.name} {m.slots > 1 && <span style={{fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 'bold', marginLeft: '0.4rem'}}>(x{m.slots} slot)</span>}
+                          </span>
                           <span className="member-phone">{m.phone}</span>
                           <span className="member-level badge-level">{m.level || 'Chưa chọn'}</span>
                         </div>

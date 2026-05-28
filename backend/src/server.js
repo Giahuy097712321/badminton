@@ -99,24 +99,55 @@ app.delete('/api/sessions/:id', async (req, res) => {
 // POST register for a session
 app.post('/api/sessions/:id/register', async (req, res) => {
   try {
-    const { name, phone, level } = req.body;
+    const { name, phone, level, slots } = req.body;
     const session = await Session.findById(req.params.id);
     
     if (!session) {
       return res.status(404).json({ error: 'Không tìm thấy buổi giao lưu này' });
     }
 
-    if (session.registeredMembers.length >= session.maxSlots) {
-      return res.status(400).json({ error: 'Đã hết slot cho buổi này!' });
+    // 1. Validate Name
+    const nameClean = (name || '').trim();
+    if (nameClean.length < 2 || nameClean.length > 50) {
+      return res.status(400).json({ error: 'Họ và tên phải từ 2 đến 50 ký tự!' });
+    }
+    const hasInvalidChars = /[\d`~!@#$%^&*()_\-+={[}\]|\\:;"'<,>.?\/]/.test(nameClean);
+    if (hasInvalidChars) {
+      return res.status(400).json({ error: 'Họ và tên không được chứa số hoặc ký tự đặc biệt!' });
+    }
+
+    // 2. Validate Phone
+    const phoneClean = (phone || '').trim();
+    const phoneRegex = /^(0|\+84)[35789][0-9]{8}$/;
+    if (!phoneRegex.test(phoneClean)) {
+      return res.status(400).json({ error: 'Số điện thoại không hợp lệ! Vui lòng nhập số điện thoại Việt Nam (ví dụ: 0987654321).' });
+    }
+
+    // 3. Validate Slots
+    const numSlots = parseInt(slots) || 1;
+    if (numSlots < 1 || numSlots > 5) {
+      return res.status(400).json({ error: 'Mỗi lần đăng ký chỉ được chọn từ 1 đến 5 slot!' });
+    }
+
+    // 4. Check slot capacity
+    const currentSlots = session.registeredMembers.reduce((sum, m) => sum + (m.slots || 1), 0);
+    if (currentSlots + numSlots > session.maxSlots) {
+      const slotsLeft = session.maxSlots - currentSlots;
+      return res.status(400).json({ error: `Không đủ chỗ! Chỉ còn lại ${slotsLeft} slot trống cho buổi này.` });
     }
     
-    // Check duplicate phone number
-    const isDuplicate = session.registeredMembers.some(m => m.phone === phone);
+    // 5. Check duplicate phone number
+    const isDuplicate = session.registeredMembers.some(m => m.phone === phoneClean);
     if (isDuplicate) {
       return res.status(400).json({ error: 'Số điện thoại này đã được đăng ký cho buổi này!' });
     }
 
-    session.registeredMembers.push({ name, phone, level: level || 'Không xác định' });
+    session.registeredMembers.push({ 
+      name: nameClean, 
+      phone: phoneClean, 
+      level: level || 'Không xác định',
+      slots: numSlots
+    });
     await session.save();
     
     broadcastUpdate(); // Emit socket event

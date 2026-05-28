@@ -33,6 +33,7 @@ function App() {
   const [guestName, setGuestName] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
   const [guestLevel, setGuestLevel] = useState('Trung bình -'); // Default level
+  const [guestSlots, setGuestSlots] = useState(1);
 
   const fetchSessions = async () => {
     try {
@@ -66,11 +67,37 @@ function App() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    // 1. Client-side Name Validation
+    const nameClean = guestName.trim();
+    if (nameClean.length < 2 || nameClean.length > 50) {
+      alert('Họ và tên phải từ 2 đến 50 ký tự!');
+      return;
+    }
+    const hasInvalidChars = /[\d`~!@#$%^&*()_\-+={[}\]|\\:;"'<,>.?\/]/.test(nameClean);
+    if (hasInvalidChars) {
+      alert('Họ và tên không được chứa số hoặc ký tự đặc biệt!');
+      return;
+    }
+
+    // 2. Client-side Phone Validation
+    const phoneClean = guestPhone.trim();
+    const phoneRegex = /^(0|\+84)[35789][0-9]{8}$/;
+    if (!phoneRegex.test(phoneClean)) {
+      alert('Số điện thoại không hợp lệ! Vui lòng nhập số điện thoại Việt Nam (ví dụ: 0987654321).');
+      return;
+    }
+
     try {
       const res = await fetch(`${API_URL}/api/sessions/${selectedSessionId}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: guestName, phone: guestPhone, level: guestLevel })
+        body: JSON.stringify({ 
+          name: nameClean, 
+          phone: phoneClean, 
+          level: guestLevel,
+          slots: guestSlots
+        })
       });
       
       const data = await res.json();
@@ -84,6 +111,7 @@ function App() {
       setGuestName('');
       setGuestPhone('');
       setGuestLevel('Trung bình -');
+      setGuestSlots(1);
       // No need to fetchSessions here, the socket event will trigger it
     } catch (err) {
       alert(err.message);
@@ -114,7 +142,7 @@ function App() {
         <div className="grid-layout">
           {sessions.length === 0 ? <p style={{textAlign:'center', width:'100%', color: 'var(--text-muted)'}}>Hiện tại chưa có buổi giao lưu nào.</p> : null}
           {sessions.map(s => {
-            const registeredCount = s.registeredMembers?.length || 0;
+            const registeredCount = s.registeredMembers?.reduce((sum, m) => sum + (m.slots || 1), 0) || 0;
             const slotsLeft = s.maxSlots - registeredCount;
             const isFull = slotsLeft <= 0;
             const isPast = isPastSession(s.date);
@@ -182,6 +210,16 @@ function App() {
                   <option value="Trung bình -">Trung bình -</option>
                   <option value="Trung bình">Trung bình</option>
                   <option value="Trung bình +">Trung bình +</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Số lượng Slot đăng ký</label>
+                <select className="input-field select-animated" value={guestSlots} onChange={e=>setGuestSlots(Number(e.target.value))} required>
+                  <option value="1">1 Slot</option>
+                  <option value="2">2 Slot</option>
+                  <option value="3">3 Slot</option>
+                  <option value="4">4 Slot</option>
+                  <option value="5">5 Slot</option>
                 </select>
               </div>
               <button type="submit" className="btn-submit btn-glow" style={{marginTop: '1rem'}}>Xác Nhận Giữ Chỗ</button>

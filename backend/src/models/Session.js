@@ -11,6 +11,7 @@ const sessionSchema = new mongoose.Schema({
     name: String,
     phone: String,
     level: String, // New field for user skill level
+    slots: { type: Number, default: 1 },
     registeredAt: { type: Date, default: Date.now }
   }]
 }, { timestamps: true });
