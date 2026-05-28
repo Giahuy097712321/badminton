@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import './App.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 // Initialize socket connection to backend
-const socket = io('/', { path: '/api/socket.io' }); 
-// In this setup, NGINX will proxy /api to backend, so we might need to rely on standard io('/api') or direct backend url. 
-// Given Nginx proxies /api to backend:5000, we can let Socket.io use the same path or direct connect.
-// Since nginx proxies /api, it's safer to connect directly to the host if in dev, but in docker we use standard URL.
-// Actually, let's just use standard socket.io default paths, since the backend handles CORS anyway.
-const socketConnection = io('http://localhost:5000'); 
+const socketConnection = io(API_URL); 
 
 function App() {
   const [sessions, setSessions] = useState([]);
@@ -23,7 +20,7 @@ function App() {
 
   const fetchSessions = async () => {
     try {
-      const res = await fetch('/api/sessions');
+      const res = await fetch(`${API_URL}/api/sessions`);
       const data = await res.json();
       setSessions(data);
     } catch (err) {
@@ -54,7 +51,7 @@ function App() {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`/api/sessions/${selectedSessionId}/register`, {
+      const res = await fetch(`${API_URL}/api/sessions/${selectedSessionId}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: guestName, phone: guestPhone, level: guestLevel })

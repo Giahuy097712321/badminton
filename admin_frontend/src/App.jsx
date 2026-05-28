@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import './App.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 // Socket connection
-const socketConnection = io('http://localhost:5000'); 
+const socketConnection = io(API_URL); 
 
 function App() {
   const [sessions, setSessions] = useState([]);
@@ -19,7 +21,7 @@ function App() {
 
   const fetchSessions = async () => {
     try {
-      const res = await fetch('/api/sessions');
+      const res = await fetch(`${API_URL}/api/sessions`);
       const data = await res.json();
       setSessions(data);
     } catch (err) {
@@ -45,7 +47,7 @@ function App() {
   const handleCreateSession = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/sessions', {
+      const res = await fetch(`${API_URL}/api/sessions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, date, courtCount, level, price, maxSlots })
@@ -63,7 +65,7 @@ function App() {
   const handleDeleteSession = async (id) => {
     if(!window.confirm('Chắc chắn xoá buổi này?')) return;
     try {
-      await fetch(`/api/sessions/${id}`, { method: 'DELETE' });
+      await fetch(`${API_URL}/api/sessions/${id}`, { method: 'DELETE' });
       // Socket handles refresh
     } catch (err) {
       console.error(err);
@@ -73,7 +75,7 @@ function App() {
   const handleRemoveMember = async (sessionId, phone) => {
     if(!window.confirm(`Xoá thành viên (SĐT: ${phone}) khỏi danh sách?`)) return;
     try {
-      const res = await fetch(`/api/sessions/${sessionId}/members/${phone}`, { method: 'DELETE' });
+      const res = await fetch(`${API_URL}/api/sessions/${sessionId}/members/${phone}`, { method: 'DELETE' });
       if (!res.ok) {
         const errData = await res.json();
         alert(errData.error || 'Lỗi khi xoá thành viên');
