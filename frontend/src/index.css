@@ -1,0 +1,54 @@
+:root {
+  --bg-dark: #0f172a;
+  --bg-card: rgba(30, 41, 59, 0.8);
+  --primary: #10b981; /* Emerald Green - Badminton court color */
+  --primary-hover: #059669;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.1);
+  --danger: #ef4444;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Background image overlay */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('./assets/bg.png');
+  background-size: cover;
+  background-position: center;
+  z-index: -2;
+}
+
+/* Gradient dim overlay */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
+  z-index: -1;
+}
+
+h1, h2, h3 { font-weight: 700; }
+button { cursor: pointer; border: none; font-family: inherit; }
+input, select { font-family: inherit; }

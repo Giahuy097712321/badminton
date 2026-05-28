@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_container
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mern_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_container
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/dockertest
+      - PORT=5000
+    depends_on:
+      - mongodb
+    networks:
+      - mern_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend_container
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - mern_network
+
+  admin_frontend:
+    build: ./admin_frontend
+    container_name: admin_frontend_container
+    restart: always
+    ports:
+      - "5174:80"
+    depends_on:
+      - backend
+    networks:
+      - mern_network
+
+volumes:
+  mongo_data:
+
+networks:
+  mern_network:
+    driver: bridge
