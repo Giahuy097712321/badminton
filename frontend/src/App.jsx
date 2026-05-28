@@ -1,6 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import './App.css';
+import card0 from './assets/card.png';
+import card1 from './assets/card1.png';
+import card2 from './assets/card2.png';
+import card3 from './assets/card3.png';
+
+const cardImages = [card0, card1, card2, card3];
+
+const getCardImage = (sessionId) => {
+  if (!sessionId) return cardImages[0];
+  let hash = 0;
+  for (let i = 0; i < sessionId.length; i++) {
+    hash = sessionId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % cardImages.length;
+  return cardImages[index];
+};
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -105,7 +121,7 @@ function App() {
 
             return (
               <div key={s._id} className="session-card" style={isPast ? { opacity: 0.5, filter: 'grayscale(100%)' } : {}}>
-                <div className="card-image">
+                <div className="card-image" style={{ backgroundImage: `url(${getCardImage(s._id)})` }}>
                   <div className={`status-badge ${isPast ? '' : isFull ? 'full pulse-red' : 'pulse-green'}`} style={isPast ? {background: '#64748b'} : {}}>
                     {isPast ? 'ĐÃ KẾT THÚC' : (isFull ? 'HẾT SLOT' : `CÒN ${slotsLeft} SLOT`)}
                   </div>
